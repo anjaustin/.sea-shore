@@ -87,8 +87,18 @@ format_drive() {
     drive_name=$(echo "$drive_info" | awk '{print $1}')
     drive_model=$(echo "$selected_drive_info" | awk '{$1=""; print $0}' | sed 's/^[[:space:]]*//')
 
+    # Replace spaces in the model with underscores for better naming
+    drive_model_underscored=$(echo "$drive_model" | tr ' ' '_')
+
+    # Get the drive size directly using lsblk
+    drive_size=$(lsblk -b -d -n -o SIZE "/dev/$drive_name")
+
+    # Convert the size to human-readable format
+    drive_size_human=$(numfmt --to=iec-i --suffix=B "$drive_size")
+
     # Create a default name based on the drive information
-    default_encrypted_drive_name="${drive_name}-EAR-${drive_model// /_}"
+    default_encrypted_drive_name="${drive_name}-EAR-${drive_model_underscored}"
+    [ -n "$drive_size" ] && default_encrypted_drive_name="${default_encrypted_drive_name}-${drive_size_human}"
 
     # Prompt the user for the desired name for the encrypted drive
     read -p "Enter a name for the encrypted drive (default: $default_encrypted_drive_name): " encrypted_drive_name
@@ -97,7 +107,7 @@ format_drive() {
     encrypted_drive_name=${encrypted_drive_name:-$default_encrypted_drive_name}
 
     # Confirm the drive information and the chosen name
-    echo -e "Selected Drive Information:\nDrive Name: $drive_name\nDrive Model: $drive_model"
+    echo -e "Selected Drive Information:\nDrive Name: $drive_name\nDrive Model: $drive_model\nDrive Size: $drive_size_human"
     echo -e "Encrypted Drive Name: $encrypted_drive_name"
 
     # Prompt the user for confirmation
