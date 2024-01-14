@@ -47,9 +47,12 @@ select_drive() {
 
     # Validate user input
     if [[ "$drive_number" =~ ^[0-9]+$ ]]; then
-        selected_drive_info=$(echo "$drives_list" | awk -v num="$drive_number" '$1 == num { print $2, $NF }')
+        # Get the total number of drives
+        total_drives=$(echo "$drives_list" | wc -l)
 
-        if [ -n "$selected_drive_info" ]; then
+        if (( drive_number >= 1 && drive_number <= total_drives )); then
+            selected_drive_info=$(echo "$drives_list" | awk -v num="$drive_number" '$1 == num { print $2, $NF }')
+
             # Confirm user's selection
             read -p "You selected drive $selected_drive_info. Is this correct? (y/n): " confirm_choice
 
@@ -68,61 +71,13 @@ select_drive() {
                     ;;
             esac
         else
-            echo "Invalid drive number. Exiting."
+            echo "Invalid drive number. Please enter a number between 1 and $total_drives. Exiting."
             exit 1
         fi
     else
         echo "Invalid input. Please enter a number. Exiting."
         exit 1
     fi
-}
-
-# Format the selected drive
-_format_drive() {
-    # Extract the drive name and model from lsblk output
-    drive_info=$(echo "$selected_drive_info" | awk '{print $1, $2}')
-    drive_name=$(echo "$drive_info" | awk '{print $1}')
-    drive_model=$(echo "$selected_drive_info" | awk '{$1=""; print $0}' | sed 's/^[[:space:]]*//')
-
-    # Prompt the user for the desired name for the encrypted drive
-    read -p "Enter a name for the encrypted drive (default: myencrypteddrive): " encrypted_drive_name
-
-    # Use the default name if the user doesn't enter a custom name
-    encrypted_drive_name=${encrypted_drive_name:-myencrypteddrive}
-
-    # Confirm the drive information and the chosen name
-    echo -e "Selected Drive Information:\nDrive Name: $drive_name\nDrive Model: $drive_model"
-    echo -e "Encrypted Drive Name: $encrypted_drive_name"
-
-    # Prompt the user for confirmation
-    read -p "Do you want to proceed with formatting this drive? (y/n): " confirm_format
-
-    case "$confirm_format" in
-        [yY])
-            # Format the selected drive
-            sudo cryptsetup luksFormat "/dev/$drive_name"
-
-            # Open the LUKS device
-            sudo cryptsetup luksOpen "/dev/$drive_name" "$encrypted_drive_name"
-
-            # Create ext4 filesystem
-            sudo mkfs.ext4 "/dev/mapper/$encrypted_drive_name"
-
-            # Mount the LUKS device
-            sudo mkdir -vp "/mnt/$encrypted_drive_name"
-            sudo mount "/dev/mapper/$encrypted_drive_name" "/mnt/$encrypted_drive_name"
-
-            echo "Drive formatting and encryption completed successfully."
-            ;;
-        [nN])
-            echo "Formatting canceled. Exiting."
-            exit 1
-            ;;
-        *)
-            echo "Invalid choice. Exiting."
-            exit 1
-            ;;
-    esac
 }
 
 # Function to format the selected drive
@@ -195,10 +150,16 @@ update_user_bash() {
     esac
 }
 
-
 ### Start Script ###
+# Are requirements installed?
 cryptsetup_installed
+
+# Select the drive to format and encrypt
 select_drive
+
+# Format and encrypt selected drive
 format_drive
+
+# Update user files to automate unlocking and locking
 update_user_bash
 # EOF >>>
