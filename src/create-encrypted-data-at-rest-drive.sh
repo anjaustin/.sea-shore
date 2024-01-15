@@ -257,7 +257,7 @@ format_drive() {
     drive_size_human=$(numfmt --to=iec-i --suffix=B "$drive_size")
 
     # Set default name based on drive information
-    default_encrypted_drive_name="${drive_name}-EAR-${drive_model_underscored}"
+    default_encrypted_drive_name="${drive_name}-EDAR-${drive_model_underscored}"
     [ -n "$drive_size" ] && default_encrypted_drive_name="${default_encrypted_drive_name}-${drive_size_human}"
 
     # Prompt user for custom name or use default
