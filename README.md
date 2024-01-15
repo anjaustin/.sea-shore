@@ -5,7 +5,7 @@ This Bash script facilitates the creation of encrypted storage drives at rest us
 
 ### Version: v0.1.8-alpha - Initial Public Release
 
-Known Issue: DEBUG=1 must be set to get full prompts. Otherwise the user is flying blind.
+Known Issue: DEBUG=1 must be set to get full prompts. Otherwise the user is flying blind.pdate
 
 ## Compatibility
 - Developed on Ubuntu Server 22.04 LTS

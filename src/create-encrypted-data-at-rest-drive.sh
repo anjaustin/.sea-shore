@@ -85,38 +85,56 @@ DEBUG=${DEBUG:-0}
 # Log directory
 LOG_DIR="/var/log/edar_drive_setup"
 
+# Log Levels
+readonly LL=("INFO" "WARNING" "ERROR")
 
 ### FUNCTIONS ###
 # Script logging
 log_message() {
-    log_level="$1"
-    message="$2"
-
     # Define log directory and file path
     local log_dir=$LOG_DIR
-    local log_file="$log_dir/$(date +"%Y%m%d")_edar_drive_setup.log"
+    local log_file="${log_dir}/$(date +"%Y%m%d")_edar_drive_setup.log"
+    local log_level="$1"
+    local message="$2"
+
+    # Log the message with timestamp and log level
+    local log_entry="$(date +"%Y-%m-%dT%H:%M:%S") > [${log_level}] - ${message}"
+
+    # Append the log entry to the log file
+    echo -e "$log_entry" | sudo tee -a "$log_file" > /dev/null
+}
+
+# Setup logging directory and initial log file
+make_logging() {
+    # Define log directory and file path
+    local log_dir=$LOG_DIR
+    local log_file="${log_dir}/$(date +"%Y%m%d")_edar_drive_setup.log"
 
     # Create log directory if it doesn't exist
-    sudo mkdir -p "$log_dir" || { echo "Error: Could not create log directory. Exiting."; exit 1; }
+    if [ ! -e "$log_dir" ]; then
+        sudo mkdir -p "$log_dir" || { echo "Error: Could not create log directory. Exiting."; exit 1; }
+    fi
 
     # Check if log file exists, create if not
     if [ ! -e "$log_file" ]; then
         sudo touch "$log_file" || { echo "Error: Could not create log file. Exiting."; exit 1; }
         sudo chmod 644 "$log_file"
-        log_message "INFO" "Log file created: $log_file"
+        log_message "${LL[0]}" "Log file created: ${log_file}"
     fi
 
-    # Log the message with timestamp and log level
-    local log_entry="$(date +"%Y-%m-%d %H:%M:%S") [$log_level] - $message"
-    
-    # Check if DEBUG environment variable is set to 1
-    if [ $DEBUG == 1 ]; then
-        # Print log entry to the terminal
-        echo "$log_entry"
-    fi
+}
 
-    # Append the log entry to the log file
-    echo "$log_entry" | sudo tee -a "$log_file" > /dev/null
+# Function to print prompts and log messages based on DEBUG mode
+lprompt() {
+    local log_level="$1"
+    local message="$2"
+
+    # Print both log entry with prompts if DEBUG is 1
+    [ "$DEBUG" = "1" ] && echo "${log_level}: ${message}"
+
+    # Always prompt the user and log the activity
+    log_message "$log_level" "$message"
+    echo -e "$message"
 }
 
 # Check and install external tool dependencies
@@ -126,20 +144,20 @@ check_install_dependencies() {
     # Check if each dependency is installed
     for tool in "${dependencies[@]}"; do
         if ! command -v "$tool" &> /dev/null; then
-            log_message "WARNING" "$tool is not installed. Installing..."
+            lprompt "${LL[1]}" "${tool} is not installed. Installing..."
 
             sudo apt-get update
             sudo apt-get install -y "$tool"
 
             # Check if installation was successful
             if [ $? -eq 0 ]; then
-                log_message "INFO" "$tool is now installed."
+                lprompt "${LL[0]}" "${tool} is now installed."
             else
-                log_message "ERROR" "Failed to install $tool. Exiting."
+                lprompt "${LL[2]}" "Failed to install ${tool}. Exiting."
                 exit 1
             fi
         else
-            log_message "INFO" "$tool is already installed."
+            lprompt "${LL[0]}" "${tool} is already installed."
         fi
     done
 }
@@ -156,19 +174,21 @@ select_drive() {
 
     # Check if no drives are detected
     if [ -z "$drives_list" ]; then
-        log_message "ERROR" "No drives detected. Exiting."
+        lprompt "${LL[2]}" "No drives detected. Exiting."
         exit 1
     fi
 
     # Display the list of drives
-    log_message "INFO" "Available drives:${drives_list}"
+    lprompt "${LL[0]}" "\nAvailable drives:\n${drives_list}"
 
     # Prompt the user to select a drive by number
-    read -p "Enter the number of the drive you want to use: " drive_number
+    lprompt "${LL[0]}" "Enter the number of the drive you want to use:" 
+    read -p "> " drive_number
+    log_message "$LL{[0]}" "User response: ${drive_number}"
 
     # Validate user input for drive selection
     if ! [[ "$drive_number" =~ ^[0-9]+$ ]]; then
-        log_message "ERROR" "Invalid input. Please enter a number. Exiting."
+        lprompt "${LL[2]}" "Invalid input. Please enter a number. Exiting."
         exit 1
     fi
 
@@ -177,7 +197,7 @@ select_drive() {
 
     # Validate user input within the range of available drives
     if ! (( drive_number >= 1 && drive_number <= total_drives )); then
-        log_message "ERROR" "Invalid drive number. Please enter a number between 1 and ${total_drives}. Exiting."
+        lprompt "${LL[2]}" "Invalid drive number. Please enter a number between 1 and ${total_drives}. Exiting."
         exit 1
     fi
 
@@ -185,15 +205,17 @@ select_drive() {
     selected_drive_info=$(echo "$drives_list" | awk -v num="$drive_number" '$1 == num { print $2, $NF }')
 
     # Confirm user's drive selection
-    read -p "You selected drive ${selected_drive_info}. Is this correct? (y/n): " confirm_choice
+    lprompt "${LL[0]}" "You selected drive ${selected_drive_info}. Is this correct? (y/n):"
+    read -p  "> " confirm_choice
+    log_message "${LL[0]}" "User response: ${confirm_choice}"
 
     # Exit if user cancels the drive selection
     if ! [[ "$confirm_choice" =~ [yY] ]]; then
-        log_message "INFO" "Drive selection canceled. Exiting."
+        lprompt "${LL[0]}" "Drive selection canceled. Exiting."
         exit 1
     fi
 
-    log_message "INFO" "Drive ${selected_drive_info} confirmed."
+    lprompt "${LL[0]}" "Drive ${selected_drive_info} confirmed."
 }
 
 # Function to format the selected drive
@@ -215,7 +237,7 @@ format_drive() {
 
     # Check if drive name extraction failed
     if [ -z "$drive_name" ]; then
-        log_message "ERROR" "Unable to extract drive information. Exiting."
+        lprompt "${LL[2]}" "Unable to extract drive information. Exiting."
         exit 1
     fi
 
@@ -228,7 +250,7 @@ format_drive() {
 
     # Check if drive size extraction failed
     if [ -z "$drive_size" ]; then
-        log_message "ERROR" "Unable to determine drive size. Exiting."
+        lprompt "${LL[2]}" "Unable to determine drive size. Exiting."
         exit 1
     fi
 
@@ -239,113 +261,125 @@ format_drive() {
     [ -n "$drive_size" ] && default_encrypted_drive_name="${default_encrypted_drive_name}-${drive_size_human}"
 
     # Prompt user for custom name or use default
-    read -p "Enter a name for the encrypted drive (default: $default_encrypted_drive_name): " encrypted_drive_name
-    encrypted_drive_name=${encrypted_drive_name:-$default_encrypted_drive_name}
+    lprompt "${LL[0]}" "Enter a name for the encrypted drive (default: ${default_encrypted_drive_name}):"
+    read -p "> " encrypted_drive_name
+    log_message "${LL[0]}" "User response: ${encrypted_drive_name}"
+    encrypted_drive_name="${encrypted_drive_name:-$default_encrypted_drive_name}"
 
     # Prompt user to select file system type
-    echo -e "Select the file system type:\n"
-    PS3="Enter the number corresponding to your choice: "
+    echo -e "\nSelect the file system type:"
+    PS3="Enter the number corresponding to your choice:"
     options=("ext4" "xfs" "btrfs" "f2fs" "zfs" "vfat")
+
     select file_system_type in "${options[@]}"; do
         case $file_system_type in
             ext4|xfs|btrfs|f2fs|zfs|vfat)
                 break
                 ;;
             *)
-                echo "Invalid choice. Please enter a valid number."
+                lprompt "${LL[1]}" "Invalid choice. Please enter a valid number."
                 ;;
         esac
     done
 
     # Display selected drive information
-    log_message "INFO" "Selected Drive Information:
-    Drive Name: ${drive_name}
-    Drive Model: ${drive_model}
-    Drive Size: ${drive_size_human}
-    Encrypted Drive Name: ${encrypted_drive_name}
-    Selected File System Type: ${file_system_type}"
+    lprompt "$LL{[0]}" "Selected Drive Information:"
+    lprompt "$LL{[0]}" "Drive Name: ${drive_name}"
+    lprompt "$LL{[0]}" "Drive Model: ${drive_model}" 
+    lprompt "$LL{[0]}" "Drive Size: ${drive_size_human}"
+    lprompt "$LL{[0]}" "Encrypted Drive Name: ${encrypted_drive_name}"
+    lprompt "$LL{[0]}" "Selected File System Type: ${file_system_type}"
 
     # Prompt user for confirmation to format
-    read -p "Do you want to proceed with formatting this drive? (y/n): " confirm_format
+    lprompt "$LL{[0]}" "Do you want to proceed with formatting this drive? (y/n):"
+    read -p "> " confirm_format
+    log_message "${LL[0]}" "User response: ${confirm_format}"
 
     # Exit if user cancels formatting
     if ! [[ "$confirm_format" =~ [yY] ]]; then
-        log_message "WARNING" "Formatting canceled. Exiting."
+        lprompt "${LL[1]}" "Formatting canceled. Exiting."
         exit 1
     fi
 
     # Format the selected drive based on chosen file system type
-    log_message "INFO" "Formatting the drive..."
+    lprompt "${LL[0]}" "Formatting the drive..."
     sudo cryptsetup luksFormat "/dev/${drive_name}"
 
     # Check if drive formatting failed
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to format the drive. Exiting."
+        lprompt "${LL[2]}" "Failed to format the drive. Exiting."
         exit 1
     fi
 
     # Open the LUKS device
-    log_message "INFO" "Opening the LUKS device..."
+    lprompt "${LL[0]}" "Opening the LUKS device..."
     sudo cryptsetup luksOpen "/dev/${drive_name}" "${encrypted_drive_name}"
 
     # Check if opening LUKS device failed
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to open the LUKS device. Exiting."
+        lprompt "${LL[2]}" "Failed to open the LUKS device. Exiting."
         exit 1
     fi
 
     # Create the chosen file system on the LUKS device
     case "$file_system_type" in
         ext4)
-            log_message "INFO" "Creating ext4 file system..."
+            lprompt "${LL[0]}" "Creating ext4 file system..."
             sudo mkfs.ext4 "/dev/mapper/${encrypted_drive_name}"
             ;;
         xfs)
-            log_message "INFO" "Creating XFS file system..."
+            lprompt "${LL[0]}" "Creating XFS file system..."
             sudo mkfs.xfs "/dev/mapper/${encrypted_drive_name}"
             ;;
         btrfs)
-            log_message "INFO" "Creating Btrfs file system..."
+            lprompt "${LL[0]}" "Creating Btrfs file system..."
             sudo mkfs.btrfs "/dev/mapper/${encrypted_drive_name}"
             ;;
         f2fs)
-            log_message "INFO" "Creating F2FS file system..."
+            lprompt "${LL[0]}" "Creating F2FS file system..."
             sudo mkfs.f2fs "/dev/mapper/${encrypted_drive_name}"
             ;;
         zfs)
             # Note: ZFS requires additional steps; user is informed to refer to documentation
-            log_message "INFO" "ZFS requires additional steps. Please refer to ZFS documentation for usage."
+            lprompt "${LL[0]}" "Creating ZFS file system..."
             ;;
         vfat)
-            log_message "INFO" "Creating VFAT file system..."
+            lprompt "${LL[0]}" "Creating VFAT file system..."
             sudo mkfs.vfat "/dev/mapper/${encrypted_drive_name}"
             ;;
     esac
 
     # Mount the LUKS device
-    log_message "INFO" "Mounting the LUKS device..."
+    lprompt "${LL[0]}" "Mounting the LUKS device..."
     sudo mkdir -vp "/mnt/${encrypted_drive_name}"
     sudo mount "/dev/mapper/${encrypted_drive_name}" "/mnt/${encrypted_drive_name}"
 
     # Check if mounting the LUKS device failed
     if [ $? -ne 0 ]; then
-        log_message "ERROR" "Failed to mount the LUKS device. Exiting."
+        lprompt "${LL[2]}" "Failed to mount the LUKS device. Exiting."
         exit 1
     fi
 
-    log_message "INFO" "Drive formatting and encryption completed successfully."
+    lprompt "${LL[0]}" "Drive formatting and encryption completed successfully."
 }
 
 # Function to update user's '~/.bashrc' and '~/.bash_logout'
 update_user_bash() {
     local update_bashrc
+    local prompt_update_permission="Do you want to update your ~/.bashrc and ~/.bash_logout to unlock the drive on login and lock on logout? (y/n): "
+    local update_started="Updating user's ~/.bashrc and ~/.bash_logout."
+    local update_completed="Update of ~/.bashrc and ~/.bash_logout completed successfully."
+    local update_skipped="Skipping update of ~/.bashrc and ~/.bash_logout."
 
     # Prompt user for permission to update bash files
-    read -p "Do you want to update your ~/.bashrc and ~/.bash_logout to unlock the drive on login and lock on logout? (y/n): " update_bashrc
+    lprompt "${LL[0]}" "${prompt_update_permission}"
+    read -p  "> " update_bashrc
+    log_message "${LL[0]}" "User response: ${update_bashrc}"
 
     # Update bash files if user agrees
     if [[ "$update_bashrc" =~ [yY] ]]; then
-        log_message "INFO" "Updating user's ~/.bashrc and ~/.bash_logout."
+        # Log update start status to log file as confirmation of user's request to update ~/.bashrc and ~/.bash_logout
+        log_message "${LL[0]}" "$update_started"
 
         # Append commands to unlock and mount the encrypted drive to ~/.bashrc
         echo -e "\n# Mount encrypted drives\nsudo cryptsetup luksOpen '/dev/${drive_name}' '${encrypted_drive_name}'" >> ~/.bashrc
@@ -354,11 +388,11 @@ update_user_bash() {
         # Append commands to unmount and close the encrypted drive to ~/.bash_logout
         echo -e "\n# Unmount encrypted drives\nsudo umount '/mnt/${encrypted_drive_name}' && sudo cryptsetup luksClose '${encrypted_drive_name}'" >> ~/.bash_logout
 
-        log_message "INFO" "Update of ~/.bashrc and ~/.bash_logout completed successfully."
-        echo "Updates, complete."
+        # Print complete status to terminal and log as info to log file
+        lprompt "${LL[0]}" "$update_completed"
     else
-        log_message "INFO" "Skipping update of ~/.bashrc and ~/.bash_logout."
-        echo "Skipping update of ~/.bashrc and ~/.bash_logout."
+        # Print skipped status to terminal and log as info to log file
+        lprompt "${LL[0]}" "$update_skipped"
     fi
 }
 
@@ -374,6 +408,7 @@ Create encrypted storage drives at rest using LUKS encryption.
 
 Options:
   -h, --help    Display this help message and exit.
+  -v, --version Display version information.
   -l, --log-dir LOG_DIR Set the log directory. Default is "/var/log/edar_drive_setup".
 
 Examples:
@@ -406,7 +441,7 @@ EOF
             echo "$VERSION"
             ;;
         *)
-            echo "Error: Invalid option. Use -h or --help for usage information."
+            echo "${LL[2]}: Invalid option. Use -h or --help for usage information."
             exit 1
             ;;
     esac
@@ -415,27 +450,29 @@ done
 
 ### START ###
 # Initiate script and create log file before checking dependencies
-log_message "INFO" "Script execution started on $(hostname -f):$(pwd)."
+make_logging
+
+log_message "${LL[0]}" "Script execution started on $(hostname -f):$(pwd)."
 
 # Check for and installing dependencies
-log_message "INFO" "Starting checks for dependencies."
+log_message "${LL[0]}" "Starting checks for dependencies."
 check_install_dependencies
-log_message "INFO" "Dependency checks complete."
+log_message "${LL[0]}" "Dependency checks complete."
 
 # Select drive to encrypt
-log_message "INFO" "Starting drive selection."
+log_message "${LL[0]}" "Starting drive selection."
 select_drive
-log_message "INFO" "Drive selection complete."
+log_message "${LL[0]}" "Drive selection complete."
 
 # Format and encrypt selected drive
-log_message "INFO" "Starting drive formatting and encryption."
+log_message "${LL[0]}" "Starting drive formatting and encryption."
 format_drive
-log_message "INFO" "Drive formatting and encryption complete."
+log_message "${LL[0]}" "Drive formatting and encryption complete."
 
 # Setup automated locking and unlocking via user .bashrc and .bash_logout
-log_message "INFO" "Starting user .bashrc and .bash_logout updates."
+log_message "${LL[0]}" "Starting user .bashrc and .bash_logout updates."
 update_user_bash
-log_message "INFO" "User .bashrc and .bash_logout update function completed."
+log_message "${LL[0]}" "User .bashrc and .bash_logout update function completed."
 
-log_message "INFO" "Script ended without errors."
+log_message "${LL[0]}" "Script ended without errors."
 # EOF >>>
