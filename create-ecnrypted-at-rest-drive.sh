@@ -28,6 +28,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+# Full License: https://tripp.mit-license.org/
+#
 ################################################################################
 #
 # Description:
@@ -104,7 +106,7 @@ select_drive() {
     fi
 
     # Display the list of drives
-    echo -e "Available drives:\n$drives_list"
+    echo -e "Available drives:\n${drives_list}"
 
     # Prompt the user to select a drive by number
     read -p "Enter the number of the drive you want to use: " drive_number
@@ -120,7 +122,7 @@ select_drive() {
 
     # Validate user input within the range of available drives
     if ! (( drive_number >= 1 && drive_number <= total_drives )); then
-        echo "Error: Invalid drive number. Please enter a number between 1 and $total_drives. Exiting."
+        echo "Error: Invalid drive number. Please enter a number between 1 and ${total_drives}. Exiting."
         exit 1
     fi
 
@@ -128,7 +130,7 @@ select_drive() {
     selected_drive_info=$(echo "$drives_list" | awk -v num="$drive_number" '$1 == num { print $2, $NF }')
 
     # Confirm user's drive selection
-    read -p "You selected drive $selected_drive_info. Is this correct? (y/n): " confirm_choice
+    read -p "You selected drive ${selected_drive_info}. Is this correct? (y/n): " confirm_choice
 
     # Exit if user cancels the drive selection
     if ! [[ "$confirm_choice" =~ [yY] ]]; then
@@ -136,7 +138,7 @@ select_drive() {
         exit 1
     fi
 
-    echo "Drive $selected_drive_info confirmed."
+    echo "Drive ${selected_drive_info} confirmed."
 }
 
 # Function to format the selected drive
@@ -167,7 +169,7 @@ format_drive() {
     drive_model_underscored=$(echo "$drive_model" | tr ' ' '_')
 
     # Get drive size and format it for display
-    drive_size=$(lsblk -b -d -n -o SIZE "/dev/$drive_name")
+    drive_size=$(lsblk -b -d -n -o SIZE "/dev/${drive_name}")
 
     # Check if drive size extraction failed
     if [ -z "$drive_size" ]; then
@@ -201,9 +203,9 @@ format_drive() {
     done
 
     # Display selected drive information
-    echo -e "Selected Drive Information:\nDrive Name: $drive_name\nDrive Model: $drive_model\nDrive Size: $drive_size_human"
-    echo -e "Encrypted Drive Name: $encrypted_drive_name"
-    echo -e "Selected File System Type: $file_system_type"
+    echo -e "Selected Drive Information:\nDrive Name: ${drive_name}\nDrive Model: ${drive_model}\nDrive Size: ${drive_size_human}"
+    echo -e "Encrypted Drive Name: ${encrypted_drive_name}"
+    echo -e "Selected File System Type: ${file_system_type}"
 
     # Prompt user for confirmation to format
     read -p "Do you want to proceed with formatting this drive? (y/n): " confirm_format
@@ -215,7 +217,7 @@ format_drive() {
     fi
 
     # Format the selected drive based on chosen file system type
-    sudo cryptsetup luksFormat "/dev/$drive_name"
+    sudo cryptsetup luksFormat "/dev/${drive_name}"
 
     # Check if drive formatting failed
     if [ $? -ne 0 ]; then
@@ -224,7 +226,7 @@ format_drive() {
     fi
 
     # Open the LUKS device
-    sudo cryptsetup luksOpen "/dev/$drive_name" "$encrypted_drive_name"
+    sudo cryptsetup luksOpen "/dev/${drive_name}" "${encrypted_drive_name}"
 
     # Check if opening LUKS device failed
     if [ $? -ne 0 ]; then
@@ -235,29 +237,29 @@ format_drive() {
     # Create the chosen file system on the LUKS device
     case "$file_system_type" in
         ext4)
-            sudo mkfs.ext4 "/dev/mapper/$encrypted_drive_name"
+            sudo mkfs.ext4 "/dev/mapper/${encrypted_drive_name}"
             ;;
         xfs)
-            sudo mkfs.xfs "/dev/mapper/$encrypted_drive_name"
+            sudo mkfs.xfs "/dev/mapper/${encrypted_drive_name}"
             ;;
         btrfs)
-            sudo mkfs.btrfs "/dev/mapper/$encrypted_drive_name"
+            sudo mkfs.btrfs "/dev/mapper/${encrypted_drive_name}"
             ;;
         f2fs)
-            sudo mkfs.f2fs "/dev/mapper/$encrypted_drive_name"
+            sudo mkfs.f2fs "/dev/mapper/${encrypted_drive_name}"
             ;;
         zfs)
             # Note: ZFS requires additional steps; user is informed to refer to documentation
             echo "ZFS requires additional steps. Please refer to ZFS documentation for usage."
             ;;
         vfat)
-            sudo mkfs.vfat "/dev/mapper/$encrypted_drive_name"
+            sudo mkfs.vfat "/dev/mapper/${encrypted_drive_name}"
             ;;
     esac
 
     # Mount the LUKS device
-    sudo mkdir -vp "/mnt/$encrypted_drive_name"
-    sudo mount "/dev/mapper/$encrypted_drive_name" "/mnt/$encrypted_drive_name"
+    sudo mkdir -vp "/mnt/${encrypted_drive_name}"
+    sudo mount "/dev/mapper/${encrypted_drive_name}" "/mnt/${encrypted_drive_name}"
 
     # Check if mounting the LUKS device failed
     if [ $? -ne 0 ]; then
@@ -280,11 +282,11 @@ update_user_bash() {
         echo "Updating your ~/.bashrc and ~/.bash_logout"
 
         # Append commands to unlock and mount the encrypted drive to ~/.bashrc
-        echo -e "\n# Mount encrypted drives\nsudo cryptsetup luksOpen '/dev/$drive_name' '$encrypted_drive_name'" >> ~/.bashrc
-        echo "sudo mount '/dev/mapper/$encrypted_drive_name' '/mnt/$encrypted_drive_name'" >> ~/.bashrc
+        echo -e "\n# Mount encrypted drives\nsudo cryptsetup luksOpen '/dev/${drive_name}' '${encrypted_drive_name}'" >> ~/.bashrc
+        echo "sudo mount '/dev/mapper/${encrypted_drive_name}' '/mnt/${encrypted_drive_name}'" >> ~/.bashrc
 
         # Append commands to unmount and close the encrypted drive to ~/.bash_logout
-        echo -e "\n# Unmount encrypted drives\nsudo umount '/mnt/$encrypted_drive_name' && sudo cryptsetup luksClose '$encrypted_drive_name'" >> ~/.bash_logout
+        echo -e "\n# Unmount encrypted drives\nsudo umount '/mnt/${encrypted_drive_name}' && sudo cryptsetup luksClose '${encrypted_drive_name}'" >> ~/.bash_logout
 
         echo "Updates, complete."
     else
