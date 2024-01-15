@@ -130,7 +130,7 @@ lprompt() {
     local message="$2"
 
     # Print both log entry with prompts if DEBUG is 1
-    [ "$DEBUG" = "1" ] && echo "${log_level}: ${message}"
+    [ "$DEBUG" = "1" ] && echo -e "${log_level}: ${message}"
 
     # Always prompt the user and log the activity
     log_message "$log_level" "$message"
