@@ -4,7 +4,7 @@
 # create-encrypted-at-rest-drive.sh
 ################################################################################
 # Author: Aaron `Tripp` N. Josserand Austin
-# Version: 0.1.7
+# Version: v0.1.7-alpha - Initial Public Alpha Release
 # Date: 14-JAN-2024 T 16:24 Mountain US
 ################################################################################
 # MIT License
