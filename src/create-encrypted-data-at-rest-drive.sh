@@ -78,6 +78,38 @@
 
 ### FUNCTIONS ###
 
+# Script logging
+log_message() {
+    local log_level="$1"
+    local message="$2"
+
+    # Define log directory and file path
+    local log_dir="/var/log/edar_drive_setup"
+    local log_file="$log_dir/$(date +"%Y%m%d")_edar_drive_setup.log"
+
+    # Create log directory if it doesn't exist
+    sudo mkdir -p "$log_dir" || { echo "Error: Could not create log directory. Exiting."; exit 1; }
+
+    # Check if log file exists, create if not
+    if [ ! -e "$log_file" ]; then
+        sudo touch "$log_file" || { echo "Error: Could not create log file. Exiting."; exit 1; }
+        sudo chmod 644 "$log_file"
+        log_message "INFO" "Log file created: $log_file"
+    fi
+
+    # Log the message with timestamp and log level
+    local log_entry="$(date +"%Y-%m-%d %H:%M:%S") [$log_level] - $message"
+    
+    # Check if DEBUG environment variable is set to 1
+    if [ "$DEBUG" = "1" ]; then
+        # Print log entry to the terminal
+        echo "$log_entry"
+    fi
+
+    # Append the log entry to the log file
+    echo "$log_entry" | sudo tee -a "$log_file" > /dev/null
+}
+
 # Check and install external tool dependencies
 check_install_dependencies() {
     local dependencies=("cryptsetup" "lsblk" "numfmt")
@@ -308,6 +340,9 @@ update_user_bash() {
 }
 
 ### START ###
+# Initiate script and create log file before checking dependencies
+log_message "INFO" "Script execution started on $(hostname -f):$(pwd)."
+
 cryptsetup_installed
 select_drive
 format_drive
