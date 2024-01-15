@@ -32,9 +32,6 @@ This Bash script facilitates the creation of encrypted storage drives at rest us
 2. Run the script in the terminal: `./create-edar-drive.sh [-h, --help]`
 3. Follow the prompts to select a drive, choose a file system, and confirm the formatting process.
 
-## Notes
-- ZFS requires additional steps and is currently a placeholder in the script.
-
 ## Disclaimer
 This script involves drive formatting and encryption. Use it at your own risk. Make sure to back up important data before proceeding. The author is not responsible for any data loss or issues caused by the use of this script.
 
