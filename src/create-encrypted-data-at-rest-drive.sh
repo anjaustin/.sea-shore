@@ -80,7 +80,7 @@
 readonly VERSION="v0.1.8-alpha"
 
 # Enable DEBUG mode (set to 1 to enable)
-DEBUG=0
+DEBUG=${DEBUG:-0}
 
 # Log directory
 LOG_DIR="/var/log/edar_drive_setup"
@@ -89,8 +89,8 @@ LOG_DIR="/var/log/edar_drive_setup"
 ### FUNCTIONS ###
 # Script logging
 log_message() {
-    local log_level="$1"
-    local message="$2"
+    log_level="$1"
+    message="$2"
 
     # Define log directory and file path
     local log_dir=$LOG_DIR
@@ -110,7 +110,7 @@ log_message() {
     local log_entry="$(date +"%Y-%m-%d %H:%M:%S") [$log_level] - $message"
     
     # Check if DEBUG environment variable is set to 1
-    if [ "$DEBUG" = "1" ]; then
+    if [ $DEBUG == 1 ]; then
         # Print log entry to the terminal
         echo "$log_entry"
     fi
@@ -161,7 +161,7 @@ select_drive() {
     fi
 
     # Display the list of drives
-    log_message "INFO" "Available drives:\n${drives_list}"
+    log_message "INFO" "Available drives:${drives_list}"
 
     # Prompt the user to select a drive by number
     read -p "Enter the number of the drive you want to use: " drive_number
