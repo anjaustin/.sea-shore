@@ -15,15 +15,19 @@ This Bash script facilitates the creation of encrypted storage drives at rest us
 - Formats, encrypts, and mounts the selected drive using the chosen file system.
 - Optionally updates user's `~/.bashrc` and `~/.bash_logout` for automating drive unlock/lock.
 - Provides error handling and exits gracefully on user cancellation or failure.
+- Includes comprehensive logging throughout using the system `logger`.
 
 ## Requirements
 - `cryptsetup`: The script checks for the presence of `cryptsetup` and prompts the user to install it if not found.
 - `lsblk`: Used to list available drives and their details.
 - `numfmt`: Used to format drive sizes into human-readable units.
 
+## Options
+- -h, --help   Display this help message and exit.
+
 ## How to Use
 1. Make sure the script is executable: `chmod u+x create-edar-drive.sh`
-2. Run the script in the terminal: `./create-edar-drive.sh`
+2. Run the script in the terminal: `./create-edar-drive.sh [-h, --help]`
 3. Follow the prompts to select a drive, choose a file system, and confirm the formatting process.
 
 ## Notes

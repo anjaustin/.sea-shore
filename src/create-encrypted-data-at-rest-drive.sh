@@ -375,7 +375,7 @@ Requirements:
   - Dependencies: cryptsetup, lsblk, numfmt.
 
 How to Run:
-  1. Make the script executable: chmod +x $0
+  1. Make the script executable: chmod u+x $0
   2. Run the script with elevated privileges: sudo $0
 
 Feedback:
