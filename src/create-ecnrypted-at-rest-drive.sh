@@ -9,14 +9,12 @@
 ################################################################################
 # MIT License
 ################################################################################
-#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
 #
@@ -29,47 +27,53 @@
 # SOFTWARE.
 #
 # Full License: https://tripp.mit-license.org/
-#
 ################################################################################
-#
 # Description:
-# This script facilitates the creation of encrypted storage drives at rest using LUKS encryption.
-# It provides a user-friendly interface to select a drive, choose a file system type, and performs
-# the necessary steps for formatting, encrypting, and mounting the encrypted drive.
+# This script facilitates the creation of encrypted storage drives at rest using
+# LUKS encryption. It provides a user-friendly interface to select a drive,
+# choose a file system type, and performs the necessary steps for formatting,
+# encrypting, and mounting the encrypted drive.
 #
 # Usage:
 # ./create-encrypted-at-rest-drive.sh
 #
 # Requirements:
-# - cryptsetup: The script checks for the presence of cryptsetup and prompts the user to install it if not found.
+# - cryptsetup: The script checks for the presence of cryptsetup and prompts the
+# user to install it if not found.
 # - lsblk: Used to list available drives and their details.
 # - numfmt: Used to format drive sizes into human-readable units.
 #
 # Features:
-# 1. Checks for cryptsetup installation and prompts the user to install if not found.
+# 1. Checks for cryptsetup installation and prompts the user to install if not
+# found.
 # 2. Allows the user to select a drive from a list of available drives.
-# 3. Prompts the user to enter a custom name for the encrypted drive (default includes drive details).
-# 4. Offers a selection of common file system types (ext4, xfs, btrfs, f2fs, zfs, vfat).
-# 5. Formats, encrypts, and mounts the selected drive using the chosen file system.
-# 6. Optionally updates user's ~/.bashrc and ~/.bash_logout for automating drive unlock/lock.
-# 7. Provides error handling and exits gracefully on user cancelation or failure.
+# 3. Prompts the user to enter a custom name for the encrypted drive (default
+# includes drive details).
+# 4. Offers a selection of common file system types (ext4, xfs, btrfs, f2fs,
+# zfs, vfat).
+# 5. Formats, encrypts, and mounts the selected drive using the chosen file
+# system.
+# 6. Optionally updates user's ~/.bashrc and ~/.bash_logout for automating drive
+# unlock/lock.
+# 7. Provides error handling and exits gracefully on user cancelation or
+# failure.
 #
 # How to Use:
 # - Run the script in the terminal: ./create-encrypted-at-rest-drive.sh
-# - Follow the prompts to select a drive, choose a file system, and confirm the formatting process.
+# - Follow the prompts to select a drive, choose a file system, and confirm the
+# formatting process.
 #
 # Notes:
 # - ZFS requires additional steps and is currently a placeholder in the script.
 #
 # Disclaimer:
-# This script involves drive formatting and encryption. Use it at your own risk. Make sure to back up
-# important data before proceeding. The author is not responsible for any data loss or issues caused
-# by the use of this script.
+# This script involves drive formatting and encryption. Use it at your own risk.
+# Make sure to back up important data before proceeding. The author is not
+# responsible for any data loss or issues caused by the use of this script.
 #
 # Feedback:
-# Your feedback is valuable. Please report any issues or suggest improvements on the GitHub repository:
-# [GitHub Repository URL]
-#
+# Your feedback is valuable. Please report any issues or suggest improvements on
+# the GitHub repository: [GitHub Repository URL]
 ################################################################################
 
 ### FUNCTIONS ###
