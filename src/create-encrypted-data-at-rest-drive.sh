@@ -4,8 +4,8 @@
 # create-encrypted-at-rest-drive.sh
 ################################################################################
 # Author: Aaron `Tripp` N. Josserand Austin
-# Version: v0.1.7-alpha - Initial Public Alpha Release
-# Date: 14-JAN-2024 T 16:24 Mountain US
+# Version: v0.1.8-alpha - Initial Public Alpha Release
+# Date: 14-JAN-2024 T 21:23 Mountain US
 ################################################################################
 # MIT License
 ################################################################################
@@ -76,7 +76,9 @@
 # the GitHub repository: https://github.com/anjaustin/encrypted-data-at-rest
 ################################################################################
 
-### SCRIPT-LEVEL VARIABLES ###
+### VARIABLES ###
+readonly VERSION="v0.1.8-alpha"
+
 # Enable DEBUG mode (set to 1 to enable)
 DEBUG=0
 
@@ -360,42 +362,55 @@ update_user_bash() {
     fi
 }
 
-# Usage information
-usage() {
-    cat <<EOF
-Usage: $0 [-h|--help]
+# Parse command-line options
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -h|--help)
+            # Display usage information
+            cat <<EOF
+Usage: [sudo] $0 [-h|--help] [-l|--log-dir LOG_DIR]
 
 Create encrypted storage drives at rest using LUKS encryption.
 
 Options:
-  -h, --help   Display this help message and exit.
+  -h, --help    Display this help message and exit.
+  -l, --log-dir LOG_DIR Set the log directory. Default is "/var/log/edar_drive_setup".
+
+Examples:
+  ./create-encrypted-at-rest-drive.sh
+  sudo ./create-encrypted-at-rest-drive.sh
+  sudo ./create-encrypted-at-rest-drive.sh --log-dir /path/to/custom/logs
 
 Requirements:
-  - This script requires elevated privileges. You may need to run it with 'sudo'.
+  - This script selectively requires elevated privileges. You can run it with 'sudo' for your convenience.
   - Dependencies: cryptsetup, lsblk, numfmt.
 
 How to Run:
   1. Make the script executable: chmod u+x $0
-  2. Run the script with elevated privileges: sudo $0
+  2. Run the script: [sudo] $0
+  3. Run the script with debugging: DEBUG=1 [sudo] $0
 
 Feedback:
   Your feedback is valuable. Please report any issues or suggest improvements on
   the GitHub repository: https://github.com/anjaustin/encrypted-data-at-rest
 EOF
-}
-
-# Parse command-line options
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        -h|--help)
-            usage
             exit 0
+            ;;
+        -l|--log-dir)
+            # Set custom log directory
+            shift
+            LOG_DIR="$1"
+            ;;
+        -v|--version)
+            # Display version
+            echo "$VERSION"
             ;;
         *)
             echo "Error: Invalid option. Use -h or --help for usage information."
             exit 1
             ;;
     esac
+    shift
 done
 
 ### START ###
