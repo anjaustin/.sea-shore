@@ -73,7 +73,7 @@
 #
 # Feedback:
 # Your feedback is valuable. Please report any issues or suggest improvements on
-# the GitHub repository: [GitHub Repository URL]
+# the GitHub repository: https://github.com/anjaustin/encrypted-data-at-rest
 ################################################################################
 
 ### FUNCTIONS ###

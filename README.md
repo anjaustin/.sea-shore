@@ -29,7 +29,7 @@ This Bash script facilitates the creation of encrypted storage drives at rest us
 This script involves drive formatting and encryption. Use it at your own risk. Make sure to back up important data before proceeding. The author is not responsible for any data loss or issues caused by the use of this script.
 
 ## Feedback
-Your feedback is valuable. Please report any issues or suggest improvements on the [GitHub repository](https://github.com/your_username/your_repo).
+Your feedback is valuable. Please report any issues or suggest improvements on the [GitHub repository](https://github.com/anjaustin/encrypted-data-at-rest).
 
 ## License
 This script is licensed under the [MIT License](https://tripp.mit-license.org/).
