@@ -124,7 +124,7 @@ make_logging() {
 
 }
 
-# Function to print prompts and log messages based on DEBUG mode
+# Print prompts (and logs if DEBUG=1) to terminal and log messages
 lprompt() {
     local log_level="$1"
     local message="$2"
