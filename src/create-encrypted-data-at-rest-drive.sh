@@ -78,19 +78,28 @@
 
 ### FUNCTIONS ###
 
-# Check if cryptsetup is installed
-cryptsetup_installed() {
-    local cryptsetup_version
+# Check and install external tool dependencies
+check_install_dependencies() {
+    local dependencies=("cryptsetup" "lsblk" "numfmt")
 
-    # Check if cryptsetup is installed
-    if ! command -v cryptsetup &> /dev/null; then
-        echo "Error: cryptsetup is not installed. Please install it before running this script."
-        exit 1
-    fi
+    # Check if each dependency is installed
+    for tool in "${dependencies[@]}"; do
+        if ! command -v "$tool" &> /dev/null; then
+            echo "Error: $tool is not installed. Installing..."
+            sudo apt-get update
+            sudo apt-get install -y "$tool"
 
-    # Get and display cryptsetup version information
-    cryptsetup_version=$(cryptsetup -V)
-    echo "$cryptsetup_version is currently installed."
+            # Check if installation was successful
+            if [ $? -eq 0 ]; then
+                echo "$tool is now installed."
+            else
+                echo "Error: Failed to install $tool. Exiting."
+                exit 1
+            fi
+        else
+            echo "$tool is already installed."
+        fi
+    done
 }
 
 # Select the drive to format and encrypt
