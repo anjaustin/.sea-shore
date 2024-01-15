@@ -1,7 +1,11 @@
 # Create drives for encrypted data-at-rest (EDAR)
 
 ## Overview
-This Bash script facilitates the creation of encrypted storage drives at rest using LUKS encryption. It provides a user-friendly cli to select a drive, choose a file system type, and performs the necessary steps for formatting, encrypting, and mounting the encrypted drive.
+This Bash script facilitates the creation of encrypted storage drives at rest using LUKS encryption. It provides a user-friendly CLI to select a drive, choose a file system type, and performs the necessary steps for formatting, encrypting, and mounting the encrypted drive.
+
+## Compatibility
+- Developed on Ubuntu Server 22.04 LTS
+- Should be compatible with Debian-based distributions
 
 ## Features
 - Checks for `cryptsetup` installation and prompts the user to install if not found.
@@ -38,4 +42,3 @@ This script is licensed under the [MIT License](https://tripp.mit-license.org/).
 - Aaron `Tripp` N. Josserand Austin
 
 ---
-**Note:** Customize the URLs, file paths, and author details according to your actual GitHub repository and script information.
