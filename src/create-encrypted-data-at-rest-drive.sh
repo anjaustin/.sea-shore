@@ -472,7 +472,7 @@ log_message "${LL[0]}" "Drive formatting and encryption complete."
 # Setup automated locking and unlocking via user .bashrc and .bash_logout
 log_message "${LL[0]}" "Starting user .bashrc and .bash_logout updates."
 update_user_bash
-log_message "${LL[0]}" "User .bashrc and .bash_logout update function completed."
+log_message "${LL[0]}" "User .bashrc and .bash_logout update function complete."
 
 log_message "${LL[0]}" "Script ended without errors."
 # EOF >>>
