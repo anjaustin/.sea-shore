@@ -184,7 +184,7 @@ select_drive() {
     # Prompt the user to select a drive by number
     lprompt "${LL[0]}" "Enter the number of the drive you want to use:" 
     read -p "> " drive_number
-    log_message "$LL{[0]}" "User response: ${drive_number}"
+    log_message "${LL[0]}" "User response: ${drive_number}"
 
     # Validate user input for drive selection
     if ! [[ "$drive_number" =~ ^[0-9]+$ ]]; then
@@ -283,15 +283,15 @@ format_drive() {
     done
 
     # Display selected drive information
-    lprompt "$LL{[0]}" "Selected Drive Information:"
-    lprompt "$LL{[0]}" "Drive Name: ${drive_name}"
-    lprompt "$LL{[0]}" "Drive Model: ${drive_model}" 
-    lprompt "$LL{[0]}" "Drive Size: ${drive_size_human}"
-    lprompt "$LL{[0]}" "Encrypted Drive Name: ${encrypted_drive_name}"
-    lprompt "$LL{[0]}" "Selected File System Type: ${file_system_type}"
+    lprompt "${LL[0]}" "Selected Drive Information:"
+    lprompt "${LL[0]}" "Drive Name: ${drive_name}"
+    lprompt "${LL[0]}" "Drive Model: ${drive_model}" 
+    lprompt "${LL[0]}" "Drive Size: ${drive_size_human}"
+    lprompt "${LL[0]}" "Encrypted Drive Name: ${encrypted_drive_name}"
+    lprompt "${LL[0]}" "Selected File System Type: ${file_system_type}"
 
     # Prompt user for confirmation to format
-    lprompt "$LL{[0]}" "Do you want to proceed with formatting this drive? (y/n):"
+    lprompt "${LL[0]}" "Do you want to proceed with formatting this drive? (y/n):"
     read -p "> " confirm_format
     log_message "${LL[0]}" "User response: ${confirm_format}"
 
