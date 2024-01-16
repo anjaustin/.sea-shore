@@ -4,7 +4,7 @@
 # create-encrypted-at-rest-drive.sh
 ################################################################################
 # Author: Aaron `Tripp` N. Josserand Austin
-# Version: v0.1.8-alpha - Initial Public Alpha Release
+# Version: v0.1.9-alpha - Initial Public Alpha Release
 # Date: 14-JAN-2024 T 21:23 Mountain US
 ################################################################################
 # MIT License
@@ -77,7 +77,7 @@
 ################################################################################
 
 ### VARIABLES ###
-readonly VERSION="v0.1.8-alpha"
+readonly VERSION="v0.1.9-alpha"
 
 # Enable DEBUG mode (set to 1 to enable)
 DEBUG=${DEBUG:-0}
