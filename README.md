@@ -26,6 +26,8 @@ This Bash script facilitates the creation of encrypted storage drives at rest us
 
 ## Options
 - -h, --help   Display this help message and exit.
+- -v, --version Display version information.
+- -l, --log_dir LOG_DIR Set the log directory. Default is "/var/log/edar_drive_setup".
 
 ## How to Use
 1. Make sure the script is executable: `chmod u+x create-edar-drive.sh`
